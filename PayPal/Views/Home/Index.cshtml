@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Amount</th>
+    </tr>
+    <tr>
+        <td>Item1</td>
+        <td>$1</td>
+        <td>6</td>
+    </tr>
+    <tr>
+        <td>Item2</td>
+        <td>$1</td>
+        <td>4</td>
+    </tr>
+</table>
+<h5>Total amount:  $10.00 </h5>
+
+<div id="paypal-button"></div>
+
+<script src="https://www.paypalobjects.com/api/checkout.js"></script>
+
+<script>
+    var CREATE_PAYMENT_URL = 'https://localhost:44334/paypal/CreateAsync';
+    var EXECUTE_PAYMENT_URL = 'https://localhost:44334/paypal/ExecuteAsync';
+
+    paypal.Button.render({
+        env: 'sandbox', // Or 'sandbox' // production
+        commit: true, // Show a 'Pay Now' button
+
+        payment: function () {
+            return paypal.request.post(CREATE_PAYMENT_URL).then(function (data) {
+                return data.id;
+            });
+        },
+
+        onAuthorize: function (data) {
+            return paypal.request.post(EXECUTE_PAYMENT_URL, {
+                PaymentID: data.paymentID,
+                PayerID: data.payerID
+            }).then(function (data) {
+                console.log(data);
+                alert("Payment ID: " + data.id + ", Status: " + data.state);
+                // The payment is complete!
+                // You can now show a confirmation message to the customer
+            });
+        }
+    }, '#paypal-button');
+</script>
